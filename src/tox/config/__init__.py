@@ -1139,11 +1139,13 @@ class ParseIni(object):
                     tox.PYTHON.PY_FACTORS_RE.match(factor) for factor in factors - known_factors
                 )
             ):
-                order.append(name)
-                thread = Thread(target=run, args=(name, section, reader._subs, config))
-                thread.daemon = True
-                thread.start()
-                to_do.append(thread)
+                env_names = mapcat(_expand_envstr, [name])
+                for env in env_names:
+                    order.append(env)
+                    thread = Thread(target=run, args=(env, section, reader._subs, config))
+                    thread.daemon = True
+                    thread.start()
+                    to_do.append(thread)
         for thread in to_do:
             while thread.is_alive():
                 thread.join(timeout=20)
